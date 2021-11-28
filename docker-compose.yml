@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+     context: .
+     dockerfile: Dockerfile
+    image: my-php
+    env_file:
+     - ${APP_ENV}.env
+    volumes:
+      - type: bind
+        source: ./php.ini
+        target: /usr/local/etc/php/php.ini
+      - type: bind
+        source: ./html
+        target: /var/www/html
+    ports:
+      - 8080:80
+  db:
+    image: mysql:5.7.29
+    volumes:
+      - type: bind
+        source: ./initdb.d/${APP_ENV}
+        target: /docker-entrypoint-initdb.d
+    env_file:
+     - ${APP_ENV}.env
