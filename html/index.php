@@ -1,28 +1,50 @@
 <?php
 
-try {
-    $db = new PDO(sprintf('mysql:host=db;dbname=%s',getenv('MYSQL_DATABASE')), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'));
-} catch (PDOException $e) {
-      die($e->getMessage());
-}
+require_once 'vendor/autoload.php';
 
+# Maybe SQL Injection
 $user = $_POST['user'] ?? null;
 if ($user) {
+
+  try {
+      $db = new \PDO(sprintf('mysql:host=db;dbname=%s',getenv('MYSQL_DATABASE')), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'));
+  } catch (\PDOException $e) {
+      die($e->getMessage());
+  }
+
   $sql = sprintf('SELECT * FROM user WHERE name = "%s"', $user);
-  foreach ($db->query($sql) as $row) {
-      var_dump($row);
+
+  $sth = $db->query($sql);
+  if ($sth->rowCount()) {
+      echo htmlspecialchars(sprintf( '%s exist.', $user), ENT_QUOTES, 'UTF-8' );
+  } else {
+      echo htmlspecialchars(sprintf( '%s does not exist.', $user), ENT_QUOTES, 'UTF-8' );
+  }
+
+  $sth = $db->prepare('SELECT * FROM user WHERE name = :user');
+  $sth->bindValue(':user', $user, \PDO::PARAM_STR);
+  $sth->execute();
+  if ($sth->rowCount()) {
+      echo htmlspecialchars(sprintf( '%s exist.', $user), ENT_QUOTES, 'UTF-8' );
+  } else {
+      echo htmlspecialchars(sprintf( '%s does not exist.', $user), ENT_QUOTES, 'UTF-8' );
   }
 }
 
+# Maybe Command Injection
 $cmd = $_POST['cmd'] ?? null;
 if ($cmd) {
   passthru($cmd);
 }
 
+# Maybe File Inclusion
 $file = $_POST['file'] ?? null;
 if (file_exists($file)) {
   include($file);
 }
+
+# Maybe Cross-site Scripting (XSS)
+echo $_POST['echo'] ?? '';
 
 ?>
 <html>
@@ -53,6 +75,5 @@ if (file_exists($file)) {
           <input type="submit" value="submit">
          </div>
     </form>
-    Echo: <?php echo $_POST['echo'] ?? 'none'; ?>
 </body>
 </html>
