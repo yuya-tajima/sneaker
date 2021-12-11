@@ -2,7 +2,7 @@
 
 require_once 'vendor/autoload.php';
 
-# Maybe SQL Injection
+# Prevent SQL Injection
 $user = $_POST['sql'] ?? null;
 if ($user) {
 
@@ -12,28 +12,26 @@ if ($user) {
       die($e->getMessage());
   }
 
-  $sql = sprintf('SELECT * FROM user WHERE name = "%s"', $user);
+  $stmt = $db->prepare('SELECT * FROM user WHERE name = :user');
+  $stmt->bindValue(':user', $user, \PDO::PARAM_STR);
+  $stmt->execute();
 
-  $stmt = $db->query($sql);
   $result = $stmt->fetchAll();
   print_r($result);
 }
 
-# Maybe Command Injection
-$cmd = $_POST['cmd'] ?? null;
-if ($cmd) {
-  passthru($cmd);
-}
+# Prevent Command Injection
+passthru('/bin/date');
 
-# Maybe File Inclusion
-$file = $_POST['file'] ?? null;
+# Prevent File Inclusion
+$file = dirname(__DIR__) . '/inc/header.php';
 if (file_exists($file)) {
   include($file);
 }
 
-# Maybe Cross-site Scripting (XSS)
+# Prevent Cross-site Scripting (XSS)
 $xss = $_POST['xss'] ?? '';
-echo $xss;
+echo htmlspecialchars($xss);
 
 ?>
 <html>

@@ -13,3 +13,4 @@ RUN apt-get update \
 
 COPY ./php.ini /usr/local/etc/php/
 COPY ./html/ /var/www/html/
+COPY ./inc/ /var/www/inc/
