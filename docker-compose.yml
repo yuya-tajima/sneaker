@@ -5,7 +5,7 @@ services:
     build:
      context: .
      dockerfile: Dockerfile
-    image: my-php
+    image: sneaker
     env_file:
      - ${APP_ENV}.env
     volumes:
