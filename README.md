@@ -15,6 +15,12 @@ Copy `.env.sample` to create `.env`.
 cp .env.sample .env
 ```
 
+Install dependencies in the project.
+
+```shell
+docker-compose run composer install
+```
+
 Start up docker containers.
 
 ```shell
