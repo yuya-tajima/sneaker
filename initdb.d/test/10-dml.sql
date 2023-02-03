@@ -1,3 +1,11 @@
 USE test;
 INSERT INTO `test`.user (id, name) VALUES (1, "John");
 INSERT INTO `test`.user (id, name) VALUES (2, "Mary");
+INSERT INTO `test`.user (id, name) VALUES (3, "Bob");
+INSERT INTO `test`.user (id, name) VALUES (4, "Smith");
+INSERT INTO `test`.user (id, name) VALUES (5, "Robert");
+INSERT INTO `test`.user (id, name) VALUES (6, "George");
+INSERT INTO `test`.user (id, name) VALUES (7, "Linda");
+INSERT INTO `test`.user (id, name) VALUES (8, "Susan");
+INSERT INTO `test`.user (id, name) VALUES (9, "Karen");
+INSERT INTO `test`.user (id, name) VALUES (10, "Helen");
