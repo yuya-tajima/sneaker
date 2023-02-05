@@ -13,8 +13,8 @@ if ($user) {
   }
 
   $sql = sprintf('SELECT * FROM user WHERE name = "%s"', $user);
-
   $stmt = $db->query($sql);
+
   $result = $stmt->fetchAll();
   print_r($result);
 }

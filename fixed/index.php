@@ -21,7 +21,10 @@ if ($user) {
 }
 
 # Prevent Command Injection
-passthru('/bin/date');
+$cmd = '/bin/date';
+if ($cmd) {
+  passthru($cmd);
+}
 
 # Prevent File Inclusion
 $file = dirname(__DIR__) . '/inc/header.php';

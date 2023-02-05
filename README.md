@@ -18,7 +18,7 @@ cp .env.sample .env
 Install dependencies in the project.
 
 ```shell
-docker-compose run composer install
+docker-compose run app composer install
 ```
 
 Start up docker containers.
