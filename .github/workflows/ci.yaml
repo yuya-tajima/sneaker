@@ -1,0 +1,87 @@
+
+name: Example CI workflow using Snyk for PHP project
+on: push
+jobs:
+  security:
+    name: Vulnerability Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: snyk/actions/setup@master
+      - name: Run Snyk to check for the application code vulnerabilities
+        run: snyk code test
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Run Snyk to check for the OSS vulnerabilities
+        uses: snyk/actions/php@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: html --severity-threshold=high
+          command: test
+      - name: Run Snyk to monitor the OSS vulnerabilities
+        uses: snyk/actions/php@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: html
+          command: monitor
+      - name: Build a Docker image
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/sneaker .
+      - name: Run Snyk to check Docker image for vulnerabilities
+        uses: snyk/actions/docker@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/sneaker
+          args: --file=Dockerfile --severity-threshold=high
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: snyk.sarif
+  build:
+    name: Building the docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Install Composer packages
+        uses: "ramsey/composer-install@v2"
+        with:
+          working-directory: ./html
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build the image as artifact
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/sneaker:latest
+          outputs: type=docker,dest=/tmp/sneaker.tar
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: sneaker
+          path: /tmp/sneaker.tar
+  push:
+    name: Pushing the docker image to Docker hub
+    runs-on: ubuntu-latest
+    needs: [security, build]
+    steps:
+      - uses: actions/checkout@master
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: sneaker
+          path: /tmp
+      - name: Load Docker image
+        run: |
+          docker load --input /tmp/sneaker.tar
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Push the image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/sneaker:latest
