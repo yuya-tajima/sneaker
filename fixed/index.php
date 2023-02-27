@@ -28,7 +28,7 @@ if ($cmd) {
 
 # Prevent File Inclusion
 $file = dirname(__DIR__) . '/inc/header.php';
-if (file_exists($file)) {
+if ($file && file_exists($file)) {
   include($file);
 }
 

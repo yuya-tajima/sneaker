@@ -1,6 +1,17 @@
 version: '3.8'
 
 services:
+  web:
+    image: nginx:latest
+    ports:
+      - 8080:80
+    volumes:
+      - type: bind
+        source: ./html
+        target: /var/www/html
+      - type: bind
+        source: ./nginx.conf
+        target: /etc/nginx/conf.d/default.conf
   app:
     build:
      context: .
@@ -10,13 +21,11 @@ services:
      - ${APP_ENV}.env
     volumes:
       - type: bind
-        source: ./php.ini
-        target: /usr/local/etc/php/php.ini
-      - type: bind
         source: ./html
         target: /var/www/html
-    ports:
-      - 8080:80
+      - type: bind
+        source: ./php.ini
+        target: /usr/local/etc/php/php.ini
   db:
     image: mysql:5.7.29
     volumes:

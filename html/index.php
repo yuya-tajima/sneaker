@@ -27,7 +27,7 @@ if ($cmd) {
 
 # Maybe File Inclusion
 $file = $_POST['file'] ?? null;
-if (file_exists($file)) {
+if ($file && file_exists($file)) {
   include($file);
 }
 
